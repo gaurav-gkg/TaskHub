@@ -9,23 +9,15 @@ const verifyApproval = async () => {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('MongoDB Connected');
 
-        // Find a pending user or create one if none exists
-        let user = await User.findOne({ status: 'pending' });
+        // Find a pending user
+        const user = await User.findOne({ status: 'pending' });
 
         if (!user) {
-            console.log('No pending user found, creating a test user...');
-            user = await User.create({
-                name: 'Test User',
-                telegramUsername: 'testuser_' + Date.now(),
-                twitterUsername: 'testuser',
-                password: 'password123',
-                role: 'user',
-                status: 'pending'
-            });
-            console.log('Test user created:', user.telegramUsername);
-        } else {
-            console.log('Found pending user:', user.telegramUsername);
+            console.log('No pending user found.');
+            process.exit();
         }
+
+        console.log('Found pending user:', user.telegramUsername);
 
         // Attempt to approve
         console.log('Attempting to approve user...');
@@ -34,10 +26,6 @@ const verifyApproval = async () => {
 
         console.log('User approved successfully!');
         console.log('Current status:', user.status);
-
-        // Clean up if it was a test user we just created? 
-        // No, let's keep it or maybe revert it to pending to be nice?
-        // Let's just leave it approved.
 
         process.exit();
     } catch (error) {

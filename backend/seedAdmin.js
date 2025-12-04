@@ -17,10 +17,10 @@ const seedAdmin = async () => {
         }
 
         const adminUser = new User({
-            name: 'Admin',
-            telegramUsername: 'admin',
-            twitterUsername: 'admin',
-            password: 'password123',
+            name: process.env.ADMIN_NAME || 'Admin',
+            telegramUsername: process.env.ADMIN_TELEGRAM_USERNAME,
+            twitterUsername: process.env.ADMIN_TWITTER_USERNAME,
+            password: process.env.ADMIN_PASSWORD,
             role: 'admin',
             status: 'approved',
         });
@@ -28,8 +28,7 @@ const seedAdmin = async () => {
         await adminUser.save();
 
         console.log('Admin user created successfully');
-        console.log('Username: admin');
-        console.log('Password: password123');
+        console.log('Telegram Username:', process.env.ADMIN_TELEGRAM_USERNAME);
 
         process.exit();
     } catch (error) {
