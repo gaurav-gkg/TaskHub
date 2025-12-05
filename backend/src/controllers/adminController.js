@@ -126,18 +126,30 @@ const assignUsersToProject = async (req, res) => {
 // @route   POST /api/admin/projects/:projectId/tasks
 // @access  Private/Admin
 const createTask = async (req, res) => {
-  const { title, description, type } = req.body;
-  const projectId = req.params.projectId;
+  try {
+    const { title, description, type, deadline, requiresScreenshots } =
+      req.body;
+    const projectId = req.params.projectId;
 
-  const task = new Task({
-    projectId,
-    title,
-    description,
-    type,
-  });
+    const task = new Task({
+      projectId,
+      title,
+      description,
+      type,
+      deadline,
+      requiresScreenshots: requiresScreenshots === true, // Explicit boolean conversion
+    });
 
-  const createdTask = await task.save();
-  res.status(201).json(createdTask);
+    const createdTask = await task.save();
+    console.log("Task created:", {
+      id: createdTask._id,
+      requiresScreenshots: createdTask.requiresScreenshots,
+    });
+    res.status(201).json(createdTask);
+  } catch (error) {
+    console.error("Error creating task:", error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
 // @desc    Get tasks for a project
@@ -152,18 +164,38 @@ const getTasks = async (req, res) => {
 // @route   PUT /api/admin/tasks/:taskId
 // @access  Private/Admin
 const updateTask = async (req, res) => {
-  const { title, description, type } = req.body;
-  const task = await Task.findById(req.params.taskId);
+  try {
+    const { title, description, type, deadline, requiresScreenshots } =
+      req.body;
+    const task = await Task.findById(req.params.taskId);
 
-  if (task) {
-    task.title = title || task.title;
-    task.description = description || task.description;
-    task.type = type || task.type;
+    if (task) {
+      task.title = title || task.title;
+      task.description = description || task.description;
+      task.type = type || task.type;
 
-    const updatedTask = await task.save();
-    res.json(updatedTask);
-  } else {
-    res.status(404).json({ message: "Task not found" });
+      // Explicitly handle deadline (can be null/empty)
+      if (deadline !== undefined) {
+        task.deadline = deadline || null;
+      }
+
+      // Explicitly handle requiresScreenshots boolean
+      if (requiresScreenshots !== undefined) {
+        task.requiresScreenshots = Boolean(requiresScreenshots);
+      }
+
+      const updatedTask = await task.save();
+      console.log("Task updated:", {
+        id: updatedTask._id,
+        requiresScreenshots: updatedTask.requiresScreenshots,
+      });
+      res.json(updatedTask);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (error) {
+    console.error("Error updating task:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 

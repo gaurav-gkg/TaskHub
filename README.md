@@ -1,4 +1,4 @@
-# Project & Bounty Management System
+# TaskHub - Project & Bounty Management System
 
 A full-stack web application for managing projects, tasks, and bounties with Admin and User roles.
 
@@ -38,12 +38,12 @@ A full-stack web application for managing projects, tasks, and bounties with Adm
     ```bash
     cp .env.example .env
     ```
-    *Update `MONGODB_URI` and `JWT_SECRET` if needed.*
+    _Update `MONGODB_URI` and `JWT_SECRET` if needed._
 4.  Start the server:
     ```bash
     npm run dev
     ```
-    *Server runs on http://localhost:5000*
+    _Server runs on http://localhost:5000_
 
 ### Frontend Setup
 
@@ -59,7 +59,7 @@ A full-stack web application for managing projects, tasks, and bounties with Adm
     ```bash
     npm run dev
     ```
-    *App runs on http://localhost:5173*
+    _App runs on http://localhost:5173_
 
 ## Usage Guide
 

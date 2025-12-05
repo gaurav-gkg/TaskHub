@@ -12,6 +12,7 @@ const AdminTasks = () => {
     description: "",
     type: "tweet",
     deadline: "",
+    requiresScreenshots: false,
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -27,16 +28,29 @@ const AdminTasks = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log("Submitting task with data:", formData);
       if (editingId) {
-        await api.put(`/admin/tasks/${editingId}`, formData);
+        const response = await api.put(`/admin/tasks/${editingId}`, formData);
+        console.log("Update response:", response.data);
       } else {
-        await api.post(`/admin/projects/${projectId}/tasks`, formData);
+        const response = await api.post(
+          `/admin/projects/${projectId}/tasks`,
+          formData
+        );
+        console.log("Create response:", response.data);
       }
       setShowModal(false);
-      setFormData({ title: "", description: "", type: "tweet", deadline: "" });
+      setFormData({
+        title: "",
+        description: "",
+        type: "tweet",
+        deadline: "",
+        requiresScreenshots: false,
+      });
       setEditingId(null);
       fetchTasks();
     } catch (error) {
+      console.error("Operation failed:", error);
       alert("Operation failed");
     }
   };
@@ -69,6 +83,7 @@ const AdminTasks = () => {
               description: "",
               type: "tweet",
               deadline: "",
+              requiresScreenshots: false,
             });
           }}
           className="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"
@@ -137,15 +152,22 @@ const AdminTasks = () => {
                   </button>
                   <button
                     onClick={() => {
+                      console.log("Opening edit modal for task:", {
+                        id: task._id,
+                        requiresScreenshots: task.requiresScreenshots,
+                      });
                       setEditingId(task._id);
-                      setFormData({
+                      const formDataToSet = {
                         title: task.title,
                         description: task.description,
                         type: task.type,
                         deadline: task.deadline
                           ? new Date(task.deadline).toISOString().slice(0, 16)
                           : "",
-                      });
+                        requiresScreenshots: task.requiresScreenshots === true,
+                      };
+                      console.log("Setting form data:", formDataToSet);
+                      setFormData(formDataToSet);
                       setShowModal(true);
                     }}
                     className="text-gray-400 hover:text-white"
@@ -214,6 +236,40 @@ const AdminTasks = () => {
                   }
                   className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
                 />
+              </div>
+              <div
+                className="flex items-center p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    requiresScreenshots: !formData.requiresScreenshots,
+                  })
+                }
+              >
+                <div
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-3 transition ${
+                    formData.requiresScreenshots
+                      ? "bg-blue-600 border-blue-600"
+                      : "bg-gray-800 border-gray-500"
+                  }`}
+                >
+                  {formData.requiresScreenshots && (
+                    <svg
+                      className="w-4 h-4 text-white"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  )}
+                </div>
+                <span className="text-sm font-medium select-none">
+                  Require Screenshots Upload
+                </span>
               </div>
               <div className="flex justify-end space-x-2">
                 <button

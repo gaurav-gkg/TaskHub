@@ -26,6 +26,10 @@ const taskSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    requiresScreenshots: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

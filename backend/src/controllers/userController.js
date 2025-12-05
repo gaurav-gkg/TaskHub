@@ -74,11 +74,17 @@ const submitTask = async (req, res) => {
     return res.status(400).json({ message: "Task already submitted" });
   }
 
+  // Handle uploaded screenshots
+  const screenshots = req.files
+    ? req.files.map((file) => `/uploads/screenshots/${file.filename}`)
+    : [];
+
   const submission = new TaskSubmission({
     taskId,
     projectId: task.projectId,
     userId: req.user._id,
     tweetLink,
+    screenshots,
   });
 
   const createdSubmission = await submission.save();

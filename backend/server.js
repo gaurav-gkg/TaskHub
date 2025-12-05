@@ -3,6 +3,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
+const path = require("path");
+const fs = require("fs");
 const connectDB = require("./src/config/db");
 
 // Load env vars
@@ -12,6 +14,12 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, "uploads", "screenshots");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // CORS Configuration
 const corsOptions = {
@@ -28,6 +36,9 @@ app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
+
+// Serve uploaded files statically
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/api/auth", require("./src/routes/authRoutes"));

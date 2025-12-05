@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
-import { ExternalLink, Check, X } from "lucide-react";
+import {
+  ExternalLink,
+  Check,
+  X,
+  Image,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const AdminSubmissions = () => {
   const [submissions, setSubmissions] = useState([]);
   const [filter, setFilter] = useState("submitted");
   const [loading, setLoading] = useState(true);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchSubmissions();
@@ -33,6 +43,28 @@ const AdminSubmissions = () => {
     } catch (error) {
       alert("Review failed");
     }
+  };
+
+  const openImageModal = (screenshots, index = 0) => {
+    setSelectedImages(screenshots);
+    setCurrentImageIndex(index);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedImages([]);
+    setCurrentImageIndex(0);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % selectedImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? selectedImages.length - 1 : prev - 1
+    );
   };
 
   return (
@@ -65,6 +97,7 @@ const AdminSubmissions = () => {
                 <th className="px-6 py-3">User</th>
                 <th className="px-6 py-3">Project / Task</th>
                 <th className="px-6 py-3">Link</th>
+                <th className="px-6 py-3">Screenshots</th>
                 <th className="px-6 py-3">Submitted</th>
                 <th className="px-6 py-3">Actions</th>
               </tr>
@@ -93,6 +126,39 @@ const AdminSubmissions = () => {
                     >
                       View Tweet <ExternalLink className="w-4 h-4 ml-1" />
                     </a>
+                  </td>
+                  <td className="px-6 py-4">
+                    {sub.screenshots && sub.screenshots.length > 0 ? (
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                          {sub.screenshots
+                            .slice(0, 3)
+                            .map((screenshot, idx) => (
+                              <img
+                                key={idx}
+                                src={`http://localhost:5000${screenshot}`}
+                                alt={`Screenshot ${idx + 1}`}
+                                className="w-16 h-16 object-cover rounded border border-gray-600 cursor-pointer hover:border-blue-500 transition"
+                                onClick={() =>
+                                  openImageModal(sub.screenshots, idx)
+                                }
+                              />
+                            ))}
+                          {sub.screenshots.length > 3 && (
+                            <button
+                              onClick={() => openImageModal(sub.screenshots, 3)}
+                              className="w-16 h-16 bg-gray-700 rounded border border-gray-600 hover:border-blue-500 flex items-center justify-center text-xs text-gray-300"
+                            >
+                              +{sub.screenshots.length - 3} more
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-gray-500 text-sm">
+                        No screenshots
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm">
@@ -144,7 +210,7 @@ const AdminSubmissions = () => {
               {submissions.length === 0 && (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="px-6 py-4 text-center text-gray-400"
                   >
                     No submissions found.
@@ -153,6 +219,69 @@ const AdminSubmissions = () => {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {showModal && selectedImages.length > 0 && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={closeModal}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] bg-gray-800 rounded-lg p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-2 text-white bg-red-600 hover:bg-red-700 rounded-full p-2 z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Image Display */}
+            <div className="flex items-center justify-center">
+              <img
+                src={`http://localhost:5000${selectedImages[currentImageIndex]}`}
+                alt={`Screenshot ${currentImageIndex + 1}`}
+                className="max-w-full max-h-[80vh] object-contain rounded"
+              />
+            </div>
+
+            {/* Navigation Controls */}
+            {selectedImages.length > 1 && (
+              <div className="flex items-center justify-between mt-4">
+                <button
+                  onClick={prevImage}
+                  className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-white">
+                  {currentImageIndex + 1} / {selectedImages.length}
+                </span>
+                <button
+                  onClick={nextImage}
+                  className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+
+            {/* Open in New Tab */}
+            <div className="text-center mt-2">
+              <a
+                href={`http://localhost:5000${selectedImages[currentImageIndex]}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 text-sm flex items-center justify-center"
+              >
+                Open in new tab <ExternalLink className="w-4 h-4 ml-1" />
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </div>

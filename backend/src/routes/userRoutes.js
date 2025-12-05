@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
+const upload = require("../middleware/upload");
 const {
   getAssignedProjects,
   getProjectTasks,
@@ -23,7 +24,11 @@ router.put("/profile", updateUserProfile);
 // Projects and Tasks
 router.get("/projects", getAssignedProjects);
 router.get("/projects/:id/tasks", getProjectTasks);
-router.post("/tasks/:taskId/submit", submitTask);
+router.post(
+  "/tasks/:taskId/submit",
+  upload.array("screenshots", 5),
+  submitTask
+);
 router.get("/submissions", getUserSubmissions);
 
 // Bounties
