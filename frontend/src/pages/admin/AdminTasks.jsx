@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../services/api";
-import { Plus, ArrowLeft, Edit, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, ArrowLeft, Edit, ToggleLeft, ToggleRight, X } from "lucide-react";
+import Card, { CardHeader, CardTitle, CardContent } from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 
 const AdminTasks = () => {
   const { projectId } = useParams();
@@ -28,16 +31,10 @@ const AdminTasks = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("Submitting task with data:", formData);
       if (editingId) {
-        const response = await api.put(`/admin/tasks/${editingId}`, formData);
-        console.log("Update response:", response.data);
+        await api.put(`/admin/tasks/${editingId}`, formData);
       } else {
-        const response = await api.post(
-          `/admin/projects/${projectId}/tasks`,
-          formData
-        );
-        console.log("Create response:", response.data);
+        await api.post(`/admin/projects/${projectId}/tasks`, formData);
       }
       setShowModal(false);
       setFormData({
@@ -65,16 +62,18 @@ const AdminTasks = () => {
   };
 
   return (
-    <div>
-      <div className="flex items-center mb-6">
-        <Link
-          to="/admin/projects"
-          className="mr-4 text-gray-400 hover:text-white"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </Link>
-        <h1 className="text-2xl font-bold">Project Tasks</h1>
-        <button
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Link
+            to="/admin/projects"
+            className="mr-4 text-text-secondary hover:text-text-primary transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </Link>
+          <h1 className="text-3xl font-bold text-text-primary">Project Tasks</h1>
+        </div>
+        <Button
           onClick={() => {
             setShowModal(true);
             setEditingId(null);
@@ -86,208 +85,208 @@ const AdminTasks = () => {
               requiresScreenshots: false,
             });
           }}
-          className="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"
         >
           <Plus className="w-4 h-4 mr-2" /> Add Task
-        </button>
+        </Button>
       </div>
 
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-700">
-            <tr>
-              <th className="px-6 py-3">Title</th>
-              <th className="px-6 py-3">Type</th>
-              <th className="px-6 py-3">Deadline</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700">
-            {tasks.map((task) => (
-              <tr key={task._id}>
-                <td className="px-6 py-4">
-                  <div>
-                    <div className="font-medium">{task.title}</div>
-                    <div className="text-sm text-gray-400">
-                      {task.description}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 capitalize">{task.type}</td>
-                <td className="px-6 py-4">
-                  {task.deadline ? (
-                    <div className="text-sm">
-                      <div>{new Date(task.deadline).toLocaleDateString()}</div>
-                      <div className="text-gray-400">
-                        {new Date(task.deadline).toLocaleTimeString()}
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-surfaceHover/50 border-b border-border">
+                <tr>
+                  <th className="px-6 py-4 text-sm font-medium text-text-secondary">Title</th>
+                  <th className="px-6 py-4 text-sm font-medium text-text-secondary">Type</th>
+                  <th className="px-6 py-4 text-sm font-medium text-text-secondary">Deadline</th>
+                  <th className="px-6 py-4 text-sm font-medium text-text-secondary">Status</th>
+                  <th className="px-6 py-4 text-sm font-medium text-text-secondary">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {tasks.map((task) => (
+                  <tr key={task._id} className="hover:bg-surfaceHover/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div>
+                        <div className="font-medium text-text-primary">{task.title}</div>
+                        <div className="text-sm text-text-secondary line-clamp-1">
+                          {task.description}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <span className="text-gray-500">No deadline</span>
-                  )}
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${
-                      task.isActive
-                        ? "bg-green-500/20 text-green-500"
-                        : "bg-red-500/20 text-red-500"
-                    }`}
-                  >
-                    {task.isActive ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 flex items-center space-x-3">
-                  <button
-                    onClick={() => toggleActive(task._id)}
-                    className="text-gray-400 hover:text-white"
-                    title="Toggle Active"
-                  >
-                    {task.isActive ? (
-                      <ToggleRight className="w-6 h-6 text-green-500" />
-                    ) : (
-                      <ToggleLeft className="w-6 h-6 text-gray-500" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      console.log("Opening edit modal for task:", {
-                        id: task._id,
-                        requiresScreenshots: task.requiresScreenshots,
-                      });
-                      setEditingId(task._id);
-                      const formDataToSet = {
-                        title: task.title,
-                        description: task.description,
-                        type: task.type,
-                        deadline: task.deadline
-                          ? new Date(task.deadline).toISOString().slice(0, 16)
-                          : "",
-                        requiresScreenshots: task.requiresScreenshots === true,
-                      };
-                      console.log("Setting form data:", formDataToSet);
-                      setFormData(formDataToSet);
-                      setShowModal(true);
-                    }}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {tasks.length === 0 && (
-              <tr>
-                <td colSpan="5" className="px-6 py-4 text-center text-gray-400">
-                  No tasks found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                    </td>
+                    <td className="px-6 py-4 capitalize text-text-secondary">{task.type}</td>
+                    <td className="px-6 py-4">
+                      {task.deadline ? (
+                        <div className="text-sm">
+                          <div className="text-text-primary">{new Date(task.deadline).toLocaleDateString()}</div>
+                          <div className="text-text-muted text-xs">
+                            {new Date(task.deadline).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-text-muted text-sm">No deadline</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${task.isActive
+                            ? "bg-success/10 text-success"
+                            : "bg-danger/10 text-danger"
+                          }`}
+                      >
+                        {task.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleActive(task._id)}
+                        title="Toggle Active"
+                      >
+                        {task.isActive ? (
+                          <ToggleRight className="w-6 h-6 text-success" />
+                        ) : (
+                          <ToggleLeft className="w-6 h-6 text-text-muted" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingId(task._id);
+                          setFormData({
+                            title: task.title,
+                            description: task.description,
+                            type: task.type,
+                            deadline: task.deadline
+                              ? new Date(task.deadline).toISOString().slice(0, 16)
+                              : "",
+                            requiresScreenshots: task.requiresScreenshots === true,
+                          });
+                          setShowModal(true);
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+                {tasks.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-8 text-center text-text-muted">
+                      No tasks found for this project.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              {editingId ? "Edit Task" : "New Task"}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Task Title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-                required
-              />
-              <textarea
-                placeholder="Description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-                rows="3"
-              />
-              <select
-                value={formData.type}
-                onChange={(e) =>
-                  setFormData({ ...formData, type: e.target.value })
-                }
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-              >
-                <option value="tweet">Tweet</option>
-                <option value="other">Other</option>
-              </select>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Deadline (Optional)
-                </label>
-                <input
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md animate-fade-in">
+            <CardHeader className="flex justify-between items-center">
+              <CardTitle>{editingId ? "Edit Task" : "New Task"}</CardTitle>
+              <button onClick={() => setShowModal(false)} className="text-text-secondary hover:text-text-primary">
+                <X className="w-5 h-5" />
+              </button>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  label="Task Title"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  required
+                />
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1.5">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 placeholder-text-muted"
+                    rows="3"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1.5">Type</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                  >
+                    <option value="tweet">Tweet</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <Input
+                  label="Deadline (Optional)"
                   type="datetime-local"
                   value={formData.deadline}
                   onChange={(e) =>
                     setFormData({ ...formData, deadline: e.target.value })
                   }
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
                 />
-              </div>
-              <div
-                className="flex items-center p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition"
-                onClick={() =>
-                  setFormData({
-                    ...formData,
-                    requiresScreenshots: !formData.requiresScreenshots,
-                  })
-                }
-              >
+
                 <div
-                  className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-3 transition ${
-                    formData.requiresScreenshots
-                      ? "bg-blue-600 border-blue-600"
-                      : "bg-gray-800 border-gray-500"
-                  }`}
+                  className="flex items-center p-3 bg-surfaceHover/30 border border-border rounded-lg cursor-pointer hover:bg-surfaceHover/50 transition"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      requiresScreenshots: !formData.requiresScreenshots,
+                    })
+                  }
                 >
-                  {formData.requiresScreenshots && (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7"></path>
-                    </svg>
-                  )}
+                  <div
+                    className={`w-5 h-5 rounded border flex items-center justify-center mr-3 transition ${formData.requiresScreenshots
+                        ? "bg-primary border-primary"
+                        : "bg-transparent border-text-muted"
+                      }`}
+                  >
+                    {formData.requiresScreenshots && (
+                      <svg
+                        className="w-3.5 h-3.5 text-white"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="3"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-text-primary select-none">
+                    Require Screenshots Upload
+                  </span>
                 </div>
-                <span className="text-sm font-medium select-none">
-                  Require Screenshots Upload
-                </span>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-300 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
+
+                <div className="flex justify-end space-x-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    Save Task
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

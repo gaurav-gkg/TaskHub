@@ -23,6 +23,7 @@ const {
   getBountySubmissions,
   updateBountySubmissionStatus,
   getExportData,
+  getDashboardStats,
 } = require("../controllers/adminController");
 
 router.use(protect);
@@ -61,5 +62,8 @@ router.put("/bounty-submissions/:id", updateBountySubmissionStatus);
 
 // Export Data
 router.get("/export-data", getExportData);
+
+// Dashboard Stats
+router.get("/stats", getDashboardStats);
 
 module.exports = router;

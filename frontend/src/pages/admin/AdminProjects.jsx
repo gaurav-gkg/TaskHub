@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
-import { Plus, Trash2, Edit, UserPlus, List } from "lucide-react";
+import { Plus, Trash2, Edit, UserPlus, List, X } from "lucide-react";
+import Card, { CardHeader, CardTitle, CardContent, CardFooter } from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 
 const AdminProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -98,10 +101,10 @@ const AdminProjects = () => {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Projects</h1>
-        <button
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-text-primary">Projects</h1>
+        <Button
           onClick={() => {
             setShowModal(true);
             setEditingId(null);
@@ -109,179 +112,185 @@ const AdminProjects = () => {
             setImageFile(null);
             setImagePreview("");
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"
         >
           <Plus className="w-4 h-4 mr-2" /> Add Project
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
-          <div
-            key={project._id}
-            className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700"
-          >
+          <Card key={project._id} className="hover:border-primary/50 transition-colors">
             {project.imageUrl && (
-              <img
-                src={project.imageUrl}
-                alt={project.name}
-                className="w-full h-40 object-cover"
-              />
+              <div className="h-48 overflow-hidden border-b border-border">
+                <img
+                  src={project.imageUrl}
+                  alt={project.name}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                />
+              </div>
             )}
-            <div className="p-4">
-              <h3 className="text-xl font-bold mb-2">{project.name}</h3>
-              <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+            <CardContent>
+              <h3 className="text-xl font-bold mb-2 text-text-primary">{project.name}</h3>
+              <p className="text-text-secondary text-sm mb-4 line-clamp-2">
                 {project.description}
               </p>
-
-              <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-700">
-                <Link
-                  to={`/admin/projects/${project._id}/tasks`}
-                  className="text-blue-400 hover:text-blue-300 flex items-center text-sm"
+            </CardContent>
+            <CardFooter className="flex justify-between items-center">
+              <Link
+                to={`/admin/projects/${project._id}/tasks`}
+                className="text-primary hover:text-primaryHover flex items-center text-sm font-medium"
+              >
+                <List className="w-4 h-4 mr-1" /> Tasks
+              </Link>
+              <div className="flex space-x-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openAssignModal(project)}
+                  title="Assign Users"
                 >
-                  <List className="w-4 h-4 mr-1" /> Tasks
-                </Link>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => openAssignModal(project)}
-                    className="text-gray-400 hover:text-white"
-                    title="Assign Users"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingId(project._id);
-                      setFormData({
-                        name: project.name,
-                        description: project.description,
-                        imageUrl: project.imageUrl,
-                      });
-                      setImagePreview(project.imageUrl || "");
-                      setShowModal(true);
-                    }}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(project._id)}
-                    className="text-red-400 hover:text-red-300"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                  <UserPlus className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEditingId(project._id);
+                    setFormData({
+                      name: project.name,
+                      description: project.description,
+                      imageUrl: project.imageUrl,
+                    });
+                    setImagePreview(project.imageUrl || "");
+                    setShowModal(true);
+                  }}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(project._id)}
+                  className="text-danger hover:text-danger"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-            </div>
-          </div>
+            </CardFooter>
+          </Card>
         ))}
       </div>
 
       {/* Create/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              {editingId ? "Edit Project" : "New Project"}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Project Name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-                required
-              />
-              <textarea
-                placeholder="Description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-                rows="3"
-              />
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Project Image
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md animate-fade-in">
+            <CardHeader className="flex justify-between items-center">
+              <CardTitle>{editingId ? "Edit Project" : "New Project"}</CardTitle>
+              <button onClick={() => setShowModal(false)} className="text-text-secondary hover:text-text-primary">
+                <X className="w-5 h-5" />
+              </button>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  label="Project Name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
                 />
-                {imagePreview && (
-                  <div className="mt-3">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded"
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-300 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1.5">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 placeholder-text-muted"
+                    rows="3"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                    Project Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all"
+                  />
+                  {imagePreview && (
+                    <div className="mt-3">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-48 object-cover rounded-lg border border-border"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    Save Project
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       {/* Assign Users Modal */}
       {assignModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
-            <h2 className="text-xl font-bold mb-4">Assign Users</h2>
-            <div className="flex-1 overflow-y-auto space-y-2 mb-4">
-              {users.map((user) => (
-                <div
-                  key={user._id}
-                  onClick={() => toggleUserSelection(user._id)}
-                  className={`p-3 rounded cursor-pointer flex justify-between items-center ${
-                    selectedUsers.includes(user._id)
-                      ? "bg-blue-600/20 border border-blue-500"
-                      : "bg-gray-700 border border-transparent"
-                  }`}
-                >
-                  <span>{user.name}</span>
-                  {selectedUsers.includes(user._id) && (
-                    <span className="text-blue-500">✓</span>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end space-x-2">
-              <button
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md max-h-[80vh] flex flex-col animate-fade-in">
+            <CardHeader className="flex justify-between items-center">
+              <CardTitle>Assign Users</CardTitle>
+              <button onClick={() => setAssignModal(null)} className="text-text-secondary hover:text-text-primary">
+                <X className="w-5 h-5" />
+              </button>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto">
+              <div className="space-y-2">
+                {users.map((user) => (
+                  <div
+                    key={user._id}
+                    onClick={() => toggleUserSelection(user._id)}
+                    className={`p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all ${selectedUsers.includes(user._id)
+                        ? "bg-primary/10 border border-primary text-primary"
+                        : "bg-surfaceHover border border-transparent hover:border-border"
+                      }`}
+                  >
+                    <span className="font-medium">{user.name}</span>
+                    {selectedUsers.includes(user._id) && (
+                      <span className="text-primary">✓</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end space-x-2">
+              <Button
+                variant="secondary"
                 onClick={() => setAssignModal(null)}
-                className="px-4 py-2 text-gray-300 hover:text-white"
               >
                 Cancel
-              </button>
-              <button
-                onClick={handleAssignSubmit}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              >
+              </Button>
+              <Button onClick={handleAssignSubmit}>
                 Save Assignments
-              </button>
-            </div>
-          </div>
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       )}
     </div>

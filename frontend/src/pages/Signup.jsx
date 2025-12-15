@@ -1,5 +1,9 @@
 import { useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import Card, { CardHeader, CardTitle, CardContent } from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -11,6 +15,7 @@ const Signup = () => {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false);
     const { signup } = useContext(AuthContext);
 
     const handleChange = (e) => {
@@ -21,91 +26,96 @@ const Signup = () => {
         e.preventDefault();
         setError('');
         setSuccess('');
+        setLoading(true);
         try {
             const res = await signup(formData);
             setSuccess(res.message);
         } catch (err) {
             setError(err.response?.data?.message || 'Signup failed');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4 py-12">
-            <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-lg p-8">
-                <h2 className="text-3xl font-bold text-white mb-6 text-center">Sign Up</h2>
-                {error && (
-                    <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded mb-4">
-                        {error}
-                    </div>
-                )}
-                {success && (
-                    <div className="bg-green-500/10 border border-green-500 text-green-500 px-4 py-2 rounded mb-4">
-                        {success}
-                    </div>
-                )}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-gray-400 mb-1">Name</label>
-                        <input
-                            type="text"
+        <div className="flex flex-col items-center justify-center min-h-[80vh] py-12">
+            <div className="mb-8 flex items-center gap-3">
+                <img src="/logo.png" alt="TaskHub" className="w-10 h-10" />
+                <span className="text-2xl font-bold text-primary">TaskHub</span>
+            </div>
+            <Card className="w-full max-w-md">
+                <CardHeader>
+                    <CardTitle className="text-2xl text-center">Create Account</CardTitle>
+                    <p className="text-text-secondary text-center mt-2">Join TaskHub today</p>
+                </CardHeader>
+                <CardContent>
+                    {error && (
+                        <div className="bg-danger/10 border border-danger text-danger px-4 py-3 rounded-lg mb-6 text-sm">
+                            {error}
+                        </div>
+                    )}
+                    {success && (
+                        <div className="bg-success/10 border border-success text-success px-4 py-3 rounded-lg mb-6 text-sm">
+                            {success}
+                        </div>
+                    )}
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <Input
+                            label="Name"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                            placeholder="John Doe"
                             required
                         />
-                    </div>
-                    <div>
-                        <label className="block text-gray-400 mb-1">Telegram Username</label>
-                        <input
-                            type="text"
+                        <Input
+                            label="Telegram Username"
                             name="telegramUsername"
                             value={formData.telegramUsername}
                             onChange={handleChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                            placeholder="@username"
                             required
                         />
-                    </div>
-                    <div>
-                        <label className="block text-gray-400 mb-1">Twitter Username</label>
-                        <input
-                            type="text"
+                        <Input
+                            label="Twitter Username"
                             name="twitterUsername"
                             value={formData.twitterUsername}
                             onChange={handleChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                            placeholder="@username"
                             required
                         />
-                    </div>
-                    <div>
-                        <label className="block text-gray-400 mb-1">Wallet Address (Optional)</label>
-                        <input
-                            type="text"
+                        <Input
+                            label="Wallet Address (Optional)"
                             name="walletAddress"
                             value={formData.walletAddress}
                             onChange={handleChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                            placeholder="0x..."
                         />
-                    </div>
-                    <div>
-                        <label className="block text-gray-400 mb-1">Password</label>
-                        <input
+                        <Input
+                            label="Password"
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                            placeholder="••••••••"
                             required
                         />
+                        <Button
+                            type="submit"
+                            className="w-full mt-2"
+                            isLoading={loading}
+                        >
+                            Sign Up
+                        </Button>
+                    </form>
+                    <div className="mt-6 text-center text-sm text-text-secondary">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-primary hover:text-primaryHover font-medium">
+                            Login
+                        </Link>
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 mt-4"
-                    >
-                        Sign Up
-                    </button>
-                </form>
-            </div>
+                </CardContent>
+            </Card>
         </div>
     );
 };

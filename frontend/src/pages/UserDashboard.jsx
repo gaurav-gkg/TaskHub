@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import Card, { CardContent } from '../components/ui/Card';
 
 const UserDashboard = () => {
     const [projects, setProjects] = useState([]);
@@ -21,38 +22,51 @@ const UserDashboard = () => {
         fetchProjects();
     }, []);
 
-    if (loading) return <div className="p-8 text-center">Loading...</div>;
+    if (loading) return <div className="p-8 text-center text-gray-400">Loading...</div>;
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-3xl font-bold mb-8">My Projects</h1>
+            <h1 className="text-3xl font-bold mb-8 text-white">My Projects</h1>
             {projects.length === 0 ? (
-                <p className="text-gray-400">No projects assigned yet.</p>
+                <div className="text-center py-12">
+                    <p className="text-gray-400 text-lg">No projects assigned yet.</p>
+                </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {projects.map((project) => (
                         <Link
                             key={project._id}
                             to={`/projects/${project._id}`}
-                            className="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition duration-300"
+                            className="block group"
                         >
-                            {project.imageUrl && (
-                                <img
-                                    src={project.imageUrl}
-                                    alt={project.name}
-                                    className="w-full h-48 object-cover"
-                                />
-                            )}
-                            <div className="p-6">
-                                <h2 className="text-xl font-bold mb-2">{project.name}</h2>
-                                <p className="text-gray-400 line-clamp-3">{project.description}</p>
-                                <div className="mt-4 flex justify-between items-center">
-                                    <span className={`px-2 py-1 rounded text-xs font-semibold ${project.status === 'active' ? 'bg-green-500/20 text-green-500' : 'bg-gray-600 text-gray-300'
-                                        }`}>
-                                        {project.status.toUpperCase()}
-                                    </span>
-                                </div>
-                            </div>
+                            <Card className="h-full overflow-hidden hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
+                                {project.imageUrl && (
+                                    <div className="relative h-48 overflow-hidden">
+                                        <img
+                                            src={project.imageUrl}
+                                            alt={project.name}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-60" />
+                                    </div>
+                                )}
+                                <CardContent className="p-6">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                                            {project.name}
+                                        </h2>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${project.status === 'active'
+                                                ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                                                : 'bg-gray-700/50 text-gray-400 border-gray-600'
+                                            }`}>
+                                            {project.status.toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-400 line-clamp-3 text-sm leading-relaxed">
+                                        {project.description}
+                                    </p>
+                                </CardContent>
+                            </Card>
                         </Link>
                     ))}
                 </div>

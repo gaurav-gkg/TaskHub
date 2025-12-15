@@ -8,6 +8,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import Card, { CardHeader, CardTitle, CardContent } from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
 
 const AdminSubmissions = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -68,215 +70,226 @@ const AdminSubmissions = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Task Submissions</h1>
-
-      <div className="flex space-x-4 mb-6">
-        {["submitted", "approved", "rejected"].map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilter(status)}
-            className={`px-4 py-2 rounded capitalize ${filter === status
-                ? "bg-blue-600 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              }`}
-          >
-            {status}
-          </button>
-        ))}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-text-primary">Task Submissions</h1>
       </div>
 
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-700">
-              <tr>
-                <th className="px-6 py-3">User</th>
-                <th className="px-6 py-3">Project / Task</th>
-                <th className="px-6 py-3">Link</th>
-                <th className="px-6 py-3">Screenshots</th>
-                <th className="px-6 py-3">Submitted</th>
-                <th className="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-              {submissions.map((sub) => (
-                <tr key={sub._id}>
-                  <td className="px-6 py-4">
-                    <div className="font-medium">{sub.userId?.name}</div>
-                    <div className="text-sm text-gray-400">
-                      @{sub.userId?.telegramUsername}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium">{sub.projectId?.name}</div>
-                    <div className="text-sm text-gray-400">
-                      {sub.taskId?.title}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <a
-                      href={sub.tweetLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 flex items-center"
-                    >
-                      View Tweet <ExternalLink className="w-4 h-4 ml-1" />
-                    </a>
-                  </td>
-                  <td className="px-6 py-4">
-                    {sub.screenshots && sub.screenshots.length > 0 ? (
-                      <div className="flex flex-col space-y-2">
-                        <div className="flex flex-wrap gap-2">
-                          {sub.screenshots
-                            .slice(0, 3)
-                            .map((screenshot, idx) => (
-                              <img
-                                key={idx}
-                                src={`${BASE_URL}${screenshot}`}
-                                alt={`Screenshot ${idx + 1}`}
-                                className="w-16 h-16 object-cover rounded border border-gray-600 cursor-pointer hover:border-blue-500 transition"
-                                onClick={() =>
-                                  openImageModal(sub.screenshots, idx)
-                                }
-                              />
-                            ))}
-                          {sub.screenshots.length > 3 && (
-                            <button
-                              onClick={() => openImageModal(sub.screenshots, 3)}
-                              className="w-16 h-16 bg-gray-700 rounded border border-gray-600 hover:border-blue-500 flex items-center justify-center text-xs text-gray-300"
-                            >
-                              +{sub.screenshots.length - 3} more
-                            </button>
-                          )}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle>Submissions</CardTitle>
+          <div className="flex space-x-2">
+            {["submitted", "approved", "rejected"].map((status) => (
+              <Button
+                key={status}
+                variant={filter === status ? "primary" : "secondary"}
+                size="sm"
+                onClick={() => setFilter(status)}
+                className="capitalize"
+              >
+                {status}
+              </Button>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="text-center py-8 text-text-secondary">Loading submissions...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-surfaceHover/50 border-b border-border">
+                  <tr>
+                    <th className="px-6 py-4 text-sm font-medium text-text-secondary">User</th>
+                    <th className="px-6 py-4 text-sm font-medium text-text-secondary">Project / Task</th>
+                    <th className="px-6 py-4 text-sm font-medium text-text-secondary">Link</th>
+                    <th className="px-6 py-4 text-sm font-medium text-text-secondary">Screenshots</th>
+                    <th className="px-6 py-4 text-sm font-medium text-text-secondary">Submitted</th>
+                    <th className="px-6 py-4 text-sm font-medium text-text-secondary">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {submissions.map((sub) => (
+                    <tr key={sub._id} className="hover:bg-surfaceHover/30 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-text-primary">{sub.userId?.name}</div>
+                        <div className="text-sm text-text-secondary">
+                          @{sub.userId?.telegramUsername}
                         </div>
-                      </div>
-                    ) : (
-                      <span className="text-gray-500 text-sm">
-                        No screenshots
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm">
-                      <div>{new Date(sub.createdAt).toLocaleDateString()}</div>
-                      <div className="text-gray-400">
-                        {new Date(sub.createdAt).toLocaleTimeString()}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {filter === "submitted" && (
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleReview(sub._id, "approved")}
-                          className="bg-green-600 hover:bg-green-700 text-white p-2 rounded"
-                          title="Approve"
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-text-primary">{sub.projectId?.name}</div>
+                        <div className="text-sm text-text-secondary line-clamp-1">
+                          {sub.taskId?.title}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <a
+                          href={sub.tweetLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:text-primaryHover flex items-center text-sm"
                         >
-                          <Check className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            const comment = prompt(
-                              "Reason for rejection (optional):"
-                            );
-                            if (comment !== null)
-                              handleReview(sub._id, "rejected", comment);
-                          }}
-                          className="bg-red-600 hover:bg-red-700 text-white p-2 rounded"
-                          title="Reject"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                    {filter !== "submitted" && (
-                      <span
-                        className={`px-2 py-1 rounded text-xs capitalize ${sub.status === "approved"
-                            ? "text-green-500"
-                            : "text-red-500"
-                          }`}
+                          View Tweet <ExternalLink className="w-3 h-3 ml-1" />
+                        </a>
+                      </td>
+                      <td className="px-6 py-4">
+                        {sub.screenshots && sub.screenshots.length > 0 ? (
+                          <div className="flex flex-col space-y-2">
+                            <div className="flex flex-wrap gap-2">
+                              {sub.screenshots
+                                .slice(0, 3)
+                                .map((screenshot, idx) => (
+                                  <img
+                                    key={idx}
+                                    src={`${BASE_URL}${screenshot}`}
+                                    alt={`Screenshot ${idx + 1}`}
+                                    className="w-12 h-12 object-cover rounded border border-border cursor-pointer hover:border-primary transition"
+                                    onClick={() =>
+                                      openImageModal(sub.screenshots, idx)
+                                    }
+                                  />
+                                ))}
+                              {sub.screenshots.length > 3 && (
+                                <button
+                                  onClick={() => openImageModal(sub.screenshots, 3)}
+                                  className="w-12 h-12 bg-surfaceHover rounded border border-border hover:border-primary flex items-center justify-center text-xs text-text-secondary"
+                                >
+                                  +{sub.screenshots.length - 3}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-text-muted text-sm">
+                            No screenshots
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          <div className="text-text-primary">{new Date(sub.createdAt).toLocaleDateString()}</div>
+                          <div className="text-text-muted text-xs">
+                            {new Date(sub.createdAt).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {filter === "submitted" && (
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="success"
+                              onClick={() => handleReview(sub._id, "approved")}
+                              title="Approve"
+                              className="px-2"
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              onClick={() => {
+                                const comment = prompt(
+                                  "Reason for rejection (optional):"
+                                );
+                                if (comment !== null)
+                                  handleReview(sub._id, "rejected", comment);
+                              }}
+                              title="Reject"
+                              className="px-2"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
+                        {filter !== "submitted" && (
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${sub.status === "approved"
+                              ? "bg-success/10 text-success"
+                              : "bg-danger/10 text-danger"
+                              }`}
+                          >
+                            {sub.status}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {submissions.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="px-6 py-8 text-center text-text-muted"
                       >
-                        {sub.status}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {submissions.length === 0 && (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="px-6 py-4 text-center text-gray-400"
-                  >
-                    No submissions found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                        No submissions found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Image Modal */}
       {showModal && selectedImages.length > 0 && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={closeModal}
         >
           <div
-            className="relative max-w-4xl max-h-[90vh] bg-gray-800 rounded-lg p-4"
+            className="relative max-w-5xl max-h-[90vh] bg-surface border border-border rounded-xl p-4 shadow-2xl animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={closeModal}
-              className="absolute top-2 right-2 text-white bg-red-600 hover:bg-red-700 rounded-full p-2 z-10"
+              className="absolute -top-4 -right-4 text-white bg-danger hover:bg-dangerHover rounded-full p-2 z-10 shadow-lg transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Image Display */}
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center bg-black/50 rounded-lg overflow-hidden">
               <img
                 src={`${BASE_URL}${selectedImages[currentImageIndex]}`}
                 alt={`Screenshot ${currentImageIndex + 1}`}
-                className="max-w-full max-h-[80vh] object-contain rounded"
+                className="max-w-full max-h-[75vh] object-contain"
               />
             </div>
 
             {/* Navigation Controls */}
             {selectedImages.length > 1 && (
-              <div className="flex items-center justify-between mt-4">
-                <button
+              <div className="flex items-center justify-between mt-4 px-4">
+                <Button
+                  variant="secondary"
                   onClick={prevImage}
-                  className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
                 >
                   <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="text-white">
+                </Button>
+                <span className="text-text-primary font-medium">
                   {currentImageIndex + 1} / {selectedImages.length}
                 </span>
-                <button
+                <Button
+                  variant="secondary"
                   onClick={nextImage}
-                  className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
                 >
                   <ChevronRight className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
             )}
 
             {/* Open in New Tab */}
-            <div className="text-center mt-2">
+            <div className="text-center mt-4">
               <a
                 href={`${BASE_URL}${selectedImages[currentImageIndex]}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 text-sm flex items-center justify-center"
+                className="text-primary hover:text-primaryHover text-sm flex items-center justify-center font-medium"
               >
-                Open in new tab <ExternalLink className="w-4 h-4 ml-1" />
+                Open original in new tab <ExternalLink className="w-4 h-4 ml-1" />
               </a>
             </div>
           </div>

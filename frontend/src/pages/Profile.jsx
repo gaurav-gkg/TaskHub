@@ -1,7 +1,10 @@
 import { useState, useEffect, useContext } from "react";
 import api from "../services/api";
 import AuthContext from "../context/AuthContext";
-import { User, Mail, MessageCircle, Twitter, Wallet, Save } from "lucide-react";
+import { User, Mail, MessageCircle, Twitter, Wallet, Save, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import Card, { CardHeader, CardTitle, CardContent } from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 
 const Profile = () => {
   const { user, setUser } = useContext(AuthContext);
@@ -69,147 +72,162 @@ const Profile = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Profile</h1>
+      <h1 className="text-3xl font-bold mb-8 text-white">My Profile</h1>
 
       {message.text && (
         <div
-          className={`mb-6 p-4 rounded-lg ${
-            message.type === "success"
-              ? "bg-green-500/20 text-green-500 border border-green-500"
-              : "bg-red-500/20 text-red-500 border border-red-500"
-          }`}
+          className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${message.type === "success"
+              ? "bg-green-500/10 text-green-500 border border-green-500/20"
+              : "bg-red-500/10 text-red-500 border border-red-500/20"
+            }`}
         >
+          {message.type === "success" ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
           {message.text}
         </div>
       )}
 
-      <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name - Read Only */}
-          <div>
-            <label className="block text-sm font-medium mb-2 flex items-center">
-              <User className="w-4 h-4 mr-2" />
-              Name
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              disabled
-              className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-3 text-white cursor-not-allowed opacity-60"
-            />
-            <p className="text-xs text-gray-400 mt-1">Name cannot be changed</p>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Account Info */}
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="border-gray-700/50 bg-gray-800/50">
+            <CardHeader>
+              <CardTitle className="text-lg text-white flex items-center gap-2">
+                <Shield className="w-5 h-5 text-blue-400" />
+                Account Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-gray-900/50 rounded-lg">
+                <span className="text-gray-400 text-sm">Role</span>
+                <span className="font-medium capitalize text-white bg-gray-700 px-2 py-1 rounded text-xs">
+                  {user?.role}
+                </span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-900/50 rounded-lg">
+                <span className="text-gray-400 text-sm">Status</span>
+                <span
+                  className={`font-medium capitalize px-2 py-1 rounded text-xs ${user?.status === "approved"
+                      ? "bg-green-500/10 text-green-500"
+                      : user?.status === "pending"
+                        ? "bg-yellow-500/10 text-yellow-500"
+                        : "bg-red-500/10 text-red-500"
+                    }`}
+                >
+                  {user?.status}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Telegram Username - Read Only */}
-          <div>
-            <label className="block text-sm font-medium mb-2 flex items-center">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Telegram Username
-            </label>
-            <div className="flex items-center">
-              <span className="bg-gray-700 border border-gray-600 border-r-0 rounded-l px-4 py-3 text-gray-400">
-                @
-              </span>
-              <input
-                type="text"
-                value={formData.telegramUsername}
-                disabled
-                className="flex-1 bg-gray-700 border border-gray-600 rounded-r px-4 py-3 text-white cursor-not-allowed opacity-60"
-              />
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Telegram username cannot be changed
-            </p>
-          </div>
+        {/* Right Column: Edit Profile Form */}
+        <div className="lg:col-span-2">
+          <Card className="border-gray-700/50 bg-gray-800/50">
+            <CardHeader>
+              <CardTitle className="text-xl text-white">Profile Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Name - Read Only */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-300 flex items-center">
+                    <User className="w-4 h-4 mr-2 text-blue-400" />
+                    Name
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.name}
+                    disabled
+                    className="bg-gray-900/50 border-gray-700 text-gray-400 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Name cannot be changed</p>
+                </div>
 
-          {/* Twitter Username - Read Only */}
-          <div>
-            <label className="block text-sm font-medium mb-2 flex items-center">
-              <Twitter className="w-4 h-4 mr-2" />
-              Twitter Username
-            </label>
-            <div className="flex items-center">
-              <span className="bg-gray-700 border border-gray-600 border-r-0 rounded-l px-4 py-3 text-gray-400">
-                @
-              </span>
-              <input
-                type="text"
-                value={formData.twitterUsername}
-                disabled
-                className="flex-1 bg-gray-700 border border-gray-600 rounded-r px-4 py-3 text-white cursor-not-allowed opacity-60"
-              />
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Twitter username cannot be changed
-            </p>
-          </div>
+                {/* Telegram Username - Read Only */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-300 flex items-center">
+                    <MessageCircle className="w-4 h-4 mr-2 text-blue-400" />
+                    Telegram Username
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">@</span>
+                    <Input
+                      type="text"
+                      value={formData.telegramUsername}
+                      disabled
+                      className="pl-8 bg-gray-900/50 border-gray-700 text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Telegram username cannot be changed
+                  </p>
+                </div>
 
-          {/* Wallet Address - Editable */}
-          <div>
-            <label className="block text-sm font-medium mb-2 flex items-center">
-              <Wallet className="w-4 h-4 mr-2" />
-              Wallet Address
-              <span className="ml-2 text-green-500 text-xs">(Editable)</span>
-            </label>
-            <input
-              type="text"
-              value={formData.walletAddress}
-              onChange={(e) =>
-                setFormData({ ...formData, walletAddress: e.target.value })
-              }
-              placeholder="Enter your wallet address"
-              className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              You can update your wallet address anytime
-            </p>
-          </div>
+                {/* Twitter Username - Read Only */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-300 flex items-center">
+                    <Twitter className="w-4 h-4 mr-2 text-blue-400" />
+                    Twitter Username
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">@</span>
+                    <Input
+                      type="text"
+                      value={formData.twitterUsername}
+                      disabled
+                      className="pl-8 bg-gray-900/50 border-gray-700 text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Twitter username cannot be changed
+                  </p>
+                </div>
 
-          {/* Submit Button */}
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium px-6 py-3 rounded-lg flex items-center justify-center transition-colors"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Updating...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
+                {/* Wallet Address - Editable */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-300 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Wallet className="w-4 h-4 mr-2 text-blue-400" />
+                      Wallet Address
+                    </div>
+                    <span className="text-green-400 text-xs bg-green-500/10 px-2 py-0.5 rounded">Editable</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.walletAddress}
+                    onChange={(e) =>
+                      setFormData({ ...formData, walletAddress: e.target.value })
+                    }
+                    placeholder="Enter your wallet address"
+                    className="bg-gray-900/50 border-gray-600 focus:border-blue-500 text-white"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    You can update your wallet address anytime
+                  </p>
+                </div>
 
-      {/* Account Info */}
-      <div className="mt-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <h3 className="text-lg font-semibold mb-4">Account Information</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-400">Account Type:</span>
-            <span className="font-medium capitalize">{user?.role}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">Account Status:</span>
-            <span
-              className={`font-medium capitalize ${
-                user?.status === "approved"
-                  ? "text-green-500"
-                  : user?.status === "pending"
-                  ? "text-yellow-500"
-                  : "text-red-500"
-              }`}
-            >
-              {user?.status}
-            </span>
-          </div>
+                {/* Submit Button */}
+                <div className="pt-4">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    {loading ? (
+                      <>
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

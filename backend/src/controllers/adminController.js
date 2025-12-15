@@ -14,7 +14,17 @@ const mongoose = require("mongoose");
 // @access  Private/Admin
 const getUsers = async (req, res) => {
   const status = req.query.status;
-  const filter = status ? { status } : {};
+  // Robust filter: exclude admin role and specific admin username from screenshot
+  const filter = {
+    role: { $ne: "admin" },
+    telegramUsername: { $ne: "admin" }
+  };
+
+  if (status) {
+    filter.status = status;
+  }
+
+  console.log("Fetching users with filter (admin excluded):", filter);
   const users = await User.find(filter).select("-password");
   res.json(users);
 };
@@ -525,6 +535,60 @@ const getExportData = async (req, res) => {
   }
 };
 
+// @desc    Get dashboard stats
+// @route   GET /api/admin/stats
+// @access  Private/Admin
+// @desc    Get dashboard stats
+// @route   GET /api/admin/stats
+// @access  Private/Admin
+const getDashboardStats = async (req, res) => {
+  try {
+    const userCount = await User.countDocuments({ role: { $ne: "admin" } });
+    const projectCount = await Project.countDocuments({});
+    const activeBountiesCount = await Bounty.countDocuments({ status: "active" });
+    const pendingSubmissionsCount = await TaskSubmission.countDocuments({ status: "pending" });
+
+    console.log("Dashboard Stats Debug:", {
+      userCount,
+      projectCount,
+      activeBountiesCount,
+      pendingSubmissionsCount
+    });
+
+    // Recent Submissions (last 5)
+    const recentSubmissions = await TaskSubmission.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("userId", "name")
+      .populate("taskId", "title");
+
+    // Recent Users (last 5)
+    const recentUsers = await User.find({ role: { $ne: "admin" } })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("name email createdAt status");
+
+    // Recent Bounties (last 5)
+    const recentBounties = await Bounty.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("title reward status createdAt");
+
+    res.json({
+      userCount,
+      projectCount,
+      activeBountiesCount,
+      pendingSubmissionsCount,
+      recentSubmissions,
+      recentUsers,
+      recentBounties,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getUsers,
   updateUserStatus,
@@ -546,4 +610,5 @@ module.exports = {
   getBountySubmissions,
   updateBountySubmissionStatus,
   getExportData,
+  getDashboardStats,
 };

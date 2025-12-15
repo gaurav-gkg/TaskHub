@@ -1,16 +1,21 @@
 import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import Card, { CardHeader, CardTitle, CardContent } from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
 
 const Login = () => {
     const [telegramUsername, setTelegramUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const user = await login(telegramUsername, password);
             if (user.role === 'admin') {
@@ -20,47 +25,59 @@ const Login = () => {
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed');
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-            <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-lg p-8">
-                <h2 className="text-3xl font-bold text-white mb-6 text-center">Login</h2>
-                {error && (
-                    <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded mb-4">
-                        {error}
-                    </div>
-                )}
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="block text-gray-400 mb-2">Telegram Username</label>
-                        <input
-                            type="text"
+        <div className="flex flex-col items-center justify-center min-h-[80vh]">
+            <div className="mb-8 flex items-center gap-3">
+                <img src="/logo.png" alt="TaskHub" className="w-10 h-10" />
+                <span className="text-2xl font-bold text-primary">TaskHub</span>
+            </div>
+            <Card className="w-full max-w-md">
+                <CardHeader>
+                    <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
+                    <p className="text-text-secondary text-center mt-2">Login to access your dashboard</p>
+                </CardHeader>
+                <CardContent>
+                    {error && (
+                        <div className="bg-danger/10 border border-danger text-danger px-4 py-3 rounded-lg mb-6 text-sm">
+                            {error}
+                        </div>
+                    )}
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <Input
+                            label="Telegram Username"
                             value={telegramUsername}
                             onChange={(e) => setTelegramUsername(e.target.value)}
-                            className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                            placeholder="@username"
                             required
                         />
-                    </div>
-                    <div>
-                        <label className="block text-gray-400 mb-2">Password</label>
-                        <input
+                        <Input
+                            label="Password"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                            placeholder="••••••••"
                             required
                         />
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            isLoading={loading}
+                        >
+                            Login
+                        </Button>
+                    </form>
+                    <div className="mt-6 text-center text-sm text-text-secondary">
+                        Don't have an account?{' '}
+                        <Link to="/signup" className="text-primary hover:text-primaryHover font-medium">
+                            Sign up
+                        </Link>
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300"
-                    >
-                        Login
-                    </button>
-                </form>
-            </div>
+                </CardContent>
+            </Card>
         </div>
     );
 };

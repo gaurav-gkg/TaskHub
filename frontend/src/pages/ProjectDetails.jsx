@@ -8,7 +8,12 @@ import {
   ExternalLink,
   Upload,
   X,
+  Calendar,
+  AlertCircle
 } from "lucide-react";
+import Card, { CardHeader, CardTitle, CardContent, CardFooter } from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -88,167 +93,184 @@ const ProjectDetails = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (loading) return <div className="p-8 text-center text-gray-400">Loading...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold mb-8">Project Tasks</h1>
-      <div className="space-y-4">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-3xl font-bold mb-8 text-white">Project Tasks</h1>
+      <div className="space-y-6">
         {tasks.map((task) => (
-          <div
-            key={task._id}
-            className="bg-gray-800 rounded-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-          >
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold mb-2">{task.title}</h3>
-              <p className="text-gray-400 mb-2">{task.description}</p>
-              <div className="flex flex-wrap gap-2 mb-2">
-                <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">
-                  {task.type.toUpperCase()}
-                </span>
-                {task.requiresScreenshots && (
-                  <span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded text-xs flex items-center">
-                    📸 Screenshots Required
-                  </span>
-                )}
-                {task.deadline && (
-                  <span className="bg-orange-500/20 text-orange-400 px-2 py-1 rounded text-xs">
-                    📅 Due: {new Date(task.deadline).toLocaleDateString()}{" "}
-                    {new Date(task.deadline).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
+          <Card key={task._id} className="overflow-hidden border-gray-700/50 bg-gray-800/50 hover:border-gray-600 transition-colors">
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start gap-4">
+                <div>
+                  <CardTitle className="text-xl text-white mb-2">{task.title}</CardTitle>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wide">
+                      {task.type}
+                    </span>
+                    {task.requiresScreenshots && (
+                      <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
+                        <Upload className="w-3 h-3" /> Screenshots Required
+                      </span>
+                    )}
+                    {task.deadline && (
+                      <span className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(task.deadline).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* Status Badge for non-submitting state */}
+                {task.submissionStatus !== "none" && (
+                  <div className="flex items-center gap-2">
+                    {task.submissionStatus === "submitted" && (
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-sm font-medium">
+                        <Clock className="w-4 h-4" /> Pending Review
+                      </span>
+                    )}
+                    {task.submissionStatus === "approved" && (
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 text-sm font-medium">
+                        <CheckCircle className="w-4 h-4" /> Approved
+                      </span>
+                    )}
+                    {task.submissionStatus === "rejected" && (
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 text-sm font-medium">
+                        <XCircle className="w-4 h-4" /> Rejected
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
-              <p className="text-xs text-gray-500">
-                Created: {new Date(task.createdAt).toLocaleDateString()} at{" "}
-                {new Date(task.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-            </div>
+            </CardHeader>
 
-            <div className="w-full md:w-auto">
-              {task.submissionStatus === "none" ? (
-                submitting === task._id ? (
-                  <div className="flex flex-col gap-3 w-full">
-                    <input
-                      type="text"
-                      placeholder="Tweet Link"
-                      value={tweetLink}
-                      onChange={(e) => setTweetLink(e.target.value)}
-                      className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+            <CardContent className="pb-4">
+              <p className="text-gray-300 leading-relaxed">{task.description}</p>
+              <div className="mt-4 pt-4 border-t border-gray-700/50 flex items-center text-xs text-gray-500">
+                <span>Created: {new Date(task.createdAt).toLocaleDateString()}</span>
+              </div>
+            </CardContent>
 
-                    {/* File upload section - Only show if task requires screenshots */}
-                    {task.requiresScreenshots && (
+            <CardFooter className="bg-gray-900/30 border-t border-gray-700/50 p-4">
+              <div className="w-full">
+                {task.submissionStatus === "none" ? (
+                  submitting === task._id ? (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
                       <div className="space-y-2">
-                        <label className="flex items-center justify-center w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded cursor-pointer hover:bg-gray-600 transition">
-                          <Upload className="w-4 h-4 mr-2" />
-                          <span className="text-sm">
-                            Upload Screenshots (Max 5){" "}
-                            <span className="text-red-400">*Required</span>
-                          </span>
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                          />
-                        </label>
-
-                        {/* Preview uploaded images */}
-                        {screenshotPreviews.length > 0 && (
-                          <div className="grid grid-cols-3 gap-2">
-                            {screenshotPreviews.map((preview, index) => (
-                              <div key={index} className="relative group">
-                                <img
-                                  src={preview}
-                                  alt={`Preview ${index + 1}`}
-                                  className="w-full h-20 object-cover rounded border border-gray-600"
-                                />
-                                <button
-                                  onClick={() => removeScreenshot(index)}
-                                  className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        <label className="text-sm font-medium text-gray-300">Submission Details</label>
+                        <Input
+                          type="text"
+                          placeholder="Paste your tweet link here..."
+                          value={tweetLink}
+                          onChange={(e) => setTweetLink(e.target.value)}
+                          className="bg-gray-800 border-gray-600 focus:border-blue-500"
+                        />
                       </div>
-                    )}
 
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleSubmit(task._id)}
-                        disabled={
-                          !tweetLink.trim() ||
-                          (task.requiresScreenshots && screenshots.length === 0)
-                        }
-                        className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded font-medium flex-1"
-                      >
-                        Submit
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSubmitting(null);
-                          setTweetLink("");
-                          setScreenshots([]);
-                          setScreenshotPreviews([]);
-                        }}
-                        className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded font-medium"
-                      >
-                        Cancel
-                      </button>
+                      {/* File upload section */}
+                      {task.requiresScreenshots && (
+                        <div className="space-y-3">
+                          <label className="flex flex-col items-center justify-center w-full h-32 px-4 transition bg-gray-800 border-2 border-gray-600 border-dashed rounded-lg hover:bg-gray-700/50 hover:border-gray-500 cursor-pointer group">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Upload className="w-8 h-8 mb-3 text-gray-400 group-hover:text-blue-400 transition-colors" />
+                              <p className="mb-1 text-sm text-gray-400 group-hover:text-gray-300">
+                                <span className="font-semibold">Click to upload</span> or drag and drop
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Max 5 screenshots (PNG, JPG)
+                              </p>
+                            </div>
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/*"
+                              onChange={handleFileChange}
+                              className="hidden"
+                            />
+                          </label>
+
+                          {/* Preview uploaded images */}
+                          {screenshotPreviews.length > 0 && (
+                            <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mt-4">
+                              {screenshotPreviews.map((preview, index) => (
+                                <div key={index} className="relative group aspect-square">
+                                  <img
+                                    src={preview}
+                                    alt={`Preview ${index + 1}`}
+                                    className="w-full h-full object-cover rounded-lg border border-gray-600"
+                                  />
+                                  <button
+                                    onClick={() => removeScreenshot(index)}
+                                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex gap-3 pt-2">
+                        <Button
+                          onClick={() => handleSubmit(task._id)}
+                          disabled={
+                            !tweetLink.trim() ||
+                            (task.requiresScreenshots && screenshots.length === 0)
+                          }
+                          className="flex-1"
+                        >
+                          Submit Work
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            setSubmitting(null);
+                            setTweetLink("");
+                            setScreenshots([]);
+                            setScreenshotPreviews([]);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setSubmitting(task._id)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
-                  >
-                    Submit Work
-                  </button>
-                )
-              ) : (
-                <div className="flex items-center gap-2">
-                  {task.submissionStatus === "submitted" && (
-                    <span className="text-yellow-500 flex items-center gap-1">
-                      <Clock className="w-4 h-4" /> Pending Review
-                    </span>
-                  )}
-                  {task.submissionStatus === "approved" && (
-                    <span className="text-green-500 flex items-center gap-1">
-                      <CheckCircle className="w-4 h-4" /> Approved
-                    </span>
-                  )}
-                  {task.submissionStatus === "rejected" && (
-                    <span className="text-red-500 flex items-center gap-1">
-                      <XCircle className="w-4 h-4" /> Rejected
-                    </span>
-                  )}
-                  {task.submission && (
-                    <a
-                      href={task.submission.tweetLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-400 hover:text-white"
+                  ) : (
+                    <Button
+                      onClick={() => setSubmitting(task._id)}
+                      className="w-full sm:w-auto"
                     >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+                      Submit Work
+                    </Button>
+                  )
+                ) : (
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-sm text-gray-400">
+                      Submission sent on {task.submission?.createdAt ? new Date(task.submission.createdAt).toLocaleDateString() : 'Unknown date'}
+                    </span>
+                    {task.submission?.tweetLink && (
+                      <a
+                        href={task.submission.tweetLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium"
+                      >
+                        View Submission <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </CardFooter>
+          </Card>
         ))}
         {tasks.length === 0 && (
-          <p className="text-gray-400">No active tasks found.</p>
+          <div className="text-center py-12 bg-gray-800/30 rounded-lg border border-gray-700/50">
+            <AlertCircle className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-400 text-lg">No active tasks found for this project.</p>
+          </div>
         )}
       </div>
     </div>

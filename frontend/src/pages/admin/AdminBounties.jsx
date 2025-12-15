@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
-import { Plus, Edit, XCircle, Users } from "lucide-react";
+import { Plus, Edit, XCircle, Users, X, Clock, ExternalLink } from "lucide-react";
+import Card, { CardHeader, CardTitle, CardContent, CardFooter } from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 
 const AdminBounties = () => {
   const [bounties, setBounties] = useState([]);
@@ -23,13 +26,12 @@ const AdminBounties = () => {
   const fetchBounties = async () => {
     try {
       const res = await api.get("/admin/bounties");
-      console.log("Fetched bounties:", res.data);
       setBounties(res.data);
     } catch (error) {
       console.error("Error fetching bounties:", error);
       alert(
         "Failed to load bounties: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -108,17 +110,15 @@ const AdminBounties = () => {
   const viewSubmissions = async (bountyId) => {
     setShowSubmissions(bountyId);
     try {
-      console.log("Fetching submissions for bounty:", bountyId);
       const res = await api.get(
         `/admin/bounty-submissions?bountyId=${bountyId}`
       );
-      console.log("Submissions response:", res.data);
       setSubmissions(res.data);
     } catch (error) {
       console.error("Error fetching submissions:", error);
       alert(
         "Failed to load submissions: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -137,41 +137,38 @@ const AdminBounties = () => {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Bounties</h1>
-        <button
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-text-primary">Bounties</h1>
+        <Button
           onClick={() => {
             setShowModal(true);
             resetForm();
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center"
         >
           <Plus className="w-4 h-4 mr-2" /> Create Bounty
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {bounties.map((bounty) => (
-          <div
-            key={bounty._id}
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700"
-          >
-            <div className="flex justify-between items-start mb-4">
+          <Card key={bounty._id} className="hover:border-primary/50 transition-colors">
+            <CardHeader className="flex flex-row justify-between items-start pb-2">
               <div>
-                <h3 className="text-xl font-bold">{bounty.title}</h3>
+                <h3 className="text-xl font-bold text-text-primary">{bounty.title}</h3>
                 <span
-                  className={`text-xs px-2 py-1 rounded ${
-                    bounty.status === "active"
-                      ? "bg-green-500/20 text-green-500"
-                      : "bg-gray-600 text-gray-300"
-                  }`}
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${bounty.status === "active"
+                      ? "bg-success/10 text-success"
+                      : "bg-surfaceHover text-text-muted"
+                    }`}
                 >
                   {bounty.status.toUpperCase()}
                 </span>
               </div>
-              <div className="flex space-x-2">
-                <button
+              <div className="flex space-x-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setEditingId(bounty._id);
                     setFormData({
@@ -184,98 +181,101 @@ const AdminBounties = () => {
                     });
                     setShowModal(true);
                   }}
-                  className="text-gray-400 hover:text-white"
                 >
                   <Edit className="w-4 h-4" />
-                </button>
+                </Button>
                 {bounty.status !== "closed" && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => closeBounty(bounty._id)}
-                    className="text-red-400 hover:text-red-300"
                     title="Close Early"
+                    className="text-danger hover:text-danger"
                   >
                     <XCircle className="w-4 h-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
-            </div>
-            <p className="text-gray-400 mb-4">{bounty.description}</p>
-            <div className="flex justify-between items-center text-sm mb-3">
-              <span className="text-green-400 font-bold">{bounty.reward}</span>
-              <div className="text-gray-500">
-                <div>
-                  Duration: {bounty.durationHours}h {bounty.durationMinutes}m
-                </div>
-                <div
-                  className={
-                    bounty.status === "active"
-                      ? "text-yellow-400 font-semibold"
-                      : ""
-                  }
-                >
-                  {getTimeRemaining(bounty.endTime)}
+            </CardHeader>
+            <CardContent>
+              <p className="text-text-secondary mb-4 line-clamp-3">{bounty.description}</p>
+              <div className="flex justify-between items-center text-sm p-3 bg-surfaceHover/30 rounded-lg">
+                <span className="text-success font-bold text-lg">{bounty.reward}</span>
+                <div className="text-right">
+                  <div className="text-text-muted text-xs">
+                    Duration: {bounty.durationHours}h {bounty.durationMinutes}m
+                  </div>
+                  <div
+                    className={`flex items-center justify-end mt-1 ${bounty.status === "active"
+                        ? "text-warning font-medium"
+                        : "text-text-muted"
+                      }`}
+                  >
+                    <Clock className="w-3 h-3 mr-1" />
+                    {getTimeRemaining(bounty.endTime)}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex justify-between items-center pt-3 border-t border-gray-700">
-              <button
+            </CardContent>
+            <CardFooter>
+              <Button
+                variant="ghost"
                 onClick={() => viewSubmissions(bounty._id)}
-                className="text-blue-400 hover:text-blue-300 flex items-center text-sm"
+                className="w-full justify-center text-primary hover:text-primaryHover"
               >
-                <Users className="w-4 h-4 mr-1" />
-                Submissions ({bounty.submissionCount || 0})
-              </button>
-            </div>
-          </div>
+                <Users className="w-4 h-4 mr-2" />
+                View Submissions ({bounty.submissionCount || 0})
+              </Button>
+            </CardFooter>
+          </Card>
         ))}
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              {editingId ? "Edit Bounty" : "New Bounty"}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-                required
-              />
-              <textarea
-                placeholder="Description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-                rows="3"
-              />
-              <input
-                type="text"
-                placeholder="Reward (e.g. 50 USDT)"
-                value={formData.reward}
-                onChange={(e) =>
-                  setFormData({ ...formData, reward: e.target.value })
-                }
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-                required
-              />
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">
-                  Duration
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Hours
-                    </label>
-                    <input
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md animate-fade-in">
+            <CardHeader className="flex justify-between items-center">
+              <CardTitle>{editingId ? "Edit Bounty" : "New Bounty"}</CardTitle>
+              <button onClick={() => setShowModal(false)} className="text-text-secondary hover:text-text-primary">
+                <X className="w-5 h-5" />
+              </button>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  label="Title"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  required
+                />
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1.5">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 placeholder-text-muted"
+                    rows="3"
+                  />
+                </div>
+                <Input
+                  label="Reward (e.g. 50 USDT)"
+                  value={formData.reward}
+                  onChange={(e) =>
+                    setFormData({ ...formData, reward: e.target.value })
+                  }
+                  required
+                />
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                    Duration
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Hours"
                       type="number"
                       min="0"
                       max="168"
@@ -286,15 +286,10 @@ const AdminBounties = () => {
                           durationHours: e.target.value,
                         })
                       }
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
                       required
                     />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">
-                      Minutes
-                    </label>
-                    <input
+                    <Input
+                      label="Minutes"
                       type="number"
                       min="0"
                       max="59"
@@ -305,54 +300,54 @@ const AdminBounties = () => {
                           durationMinutes: e.target.value,
                         })
                       }
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
                       required
                     />
                   </div>
+                  <p className="text-xs text-text-muted mt-1">
+                    Bounty will be active immediately and close after this duration
+                  </p>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Bounty will be active immediately and close after this
-                  duration
-                </p>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-300 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
+                <div className="flex justify-end space-x-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    Save Bounty
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       {/* Submissions Modal */}
       {showSubmissions && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
-            <h2 className="text-xl font-bold mb-4">Bounty Submissions</h2>
-            <div className="flex-1 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-4xl max-h-[85vh] flex flex-col animate-fade-in">
+            <CardHeader className="flex justify-between items-center">
+              <CardTitle>Bounty Submissions</CardTitle>
+              <button onClick={() => setShowSubmissions(null)} className="text-text-secondary hover:text-text-primary">
+                <X className="w-5 h-5" />
+              </button>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto bg-surface/50">
               {submissions.length === 0 ? (
-                <p className="text-gray-400">No submissions yet.</p>
+                <div className="text-center py-12 text-text-muted">No submissions yet.</div>
               ) : (
                 <div className="space-y-4">
                   {submissions.map((sub) => (
-                    <div key={sub._id} className="bg-gray-700 rounded-lg p-4">
+                    <div key={sub._id} className="bg-surface border border-border rounded-lg p-4 hover:border-border/80 transition-colors">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <h4 className="font-semibold">
+                          <h4 className="font-semibold text-text-primary">
                             {sub.userId?.name || "Unknown User"}
                           </h4>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm text-text-secondary">
                             {sub.userId?.telegramUsername &&
                               `@${sub.userId.telegramUsername}`}
                             {sub.userId?.telegramUsername &&
@@ -363,67 +358,71 @@ const AdminBounties = () => {
                           </p>
                         </div>
                         <span
-                          className={`px-2 py-1 rounded text-xs ${
-                            sub.status === "approved"
-                              ? "bg-green-500/20 text-green-500"
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${sub.status === "approved"
+                              ? "bg-success/10 text-success"
                               : sub.status === "rejected"
-                              ? "bg-red-500/20 text-red-500"
-                              : "bg-yellow-500/20 text-yellow-500"
-                          }`}
+                                ? "bg-danger/10 text-danger"
+                                : "bg-warning/10 text-warning"
+                            }`}
                         >
                           {sub.status.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-300 mb-2">
+                      <p className="text-sm text-text-secondary mb-3 bg-surfaceHover/30 p-3 rounded-md">
                         {sub.description}
                       </p>
                       <a
                         href={sub.submissionLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 text-sm break-all"
+                        className="text-primary hover:text-primaryHover text-sm break-all flex items-center mb-4"
                       >
+                        <ExternalLink className="w-3 h-3 mr-1" />
                         {sub.submissionLink}
                       </a>
-                      <div className="flex gap-2 mt-3">
-                        {sub.status === "submitted" && (
-                          <>
-                            <button
-                              onClick={() =>
-                                updateSubmissionStatus(sub._id, "approved")
-                              }
-                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() =>
-                                updateSubmissionStatus(sub._id, "rejected")
-                              }
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
+                      <div className="flex justify-between items-center pt-3 border-t border-border/50">
+                        <p className="text-xs text-text-muted">
+                          Submitted: {new Date(sub.createdAt).toLocaleString()}
+                        </p>
+                        <div className="flex gap-2">
+                          {sub.status === "submitted" && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="success"
+                                onClick={() =>
+                                  updateSubmissionStatus(sub._id, "approved")
+                                }
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="danger"
+                                onClick={() =>
+                                  updateSubmissionStatus(sub._id, "rejected")
+                                }
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Submitted: {new Date(sub.createdAt).toLocaleString()}
-                      </p>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-            <div className="flex justify-end mt-4">
-              <button
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button
+                variant="secondary"
                 onClick={() => setShowSubmissions(null)}
-                className="px-4 py-2 text-gray-300 hover:text-white"
               >
                 Close
-              </button>
-            </div>
-          </div>
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       )}
     </div>

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
-import { Download, Calendar, User, FileSpreadsheet } from "lucide-react";
+import { Download, Calendar, User, FileSpreadsheet, Filter } from "lucide-react";
+import Card, { CardHeader, CardTitle, CardContent } from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 
 const ExportData = () => {
   const [users, setUsers] = useState([]);
@@ -138,8 +141,8 @@ const ExportData = () => {
                 </thead>
                 <tbody>
                     ${exportData
-                      .map(
-                        (row) => `
+        .map(
+          (row) => `
                         <tr>
                             <td>${row.userName}</td>
                             <td>${row.email}</td>
@@ -155,8 +158,8 @@ const ExportData = () => {
                             <td>${row.adminComment || ""}</td>
                         </tr>
                     `
-                      )
-                      .join("")}
+        )
+        .join("")}
                 </tbody>
             </table>
         `;
@@ -176,190 +179,193 @@ const ExportData = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Export Data</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold text-text-primary">Export Data</h1>
 
       {/* Filters */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Filters</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              <User className="w-4 h-4 inline mr-1" />
-              User
-            </label>
-            <select
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-            >
-              <option value="">All Users</option>
-              {users.map((user) => (
-                <option key={user._id} value={user._id}>
-                  {user.name} ({user.email})
-                </option>
-              ))}
-            </select>
-          </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Filter className="w-5 h-5 mr-2" /> Filters
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                <User className="w-4 h-4 inline mr-1" />
+                User
+              </label>
+              <select
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+                className="w-full bg-surface border border-border rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+              >
+                <option value="">All Users</option>
+                {users.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.name} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Project</label>
-            <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
-            >
-              <option value="">All Projects</option>
-              {projects.map((project) => (
-                <option key={project._id} value={project._id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Project</label>
+              <select
+                value={selectedProject}
+                onChange={(e) => setSelectedProject(e.target.value)}
+                className="w-full bg-surface border border-border rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+              >
+                <option value="">All Projects</option>
+                {projects.map((project) => (
+                  <option key={project._id} value={project._id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              <Calendar className="w-4 h-4 inline mr-1" />
-              Start Date
-            </label>
-            <input
+            <Input
+              label={
+                <>
+                  <Calendar className="w-4 h-4 inline mr-1" /> Start Date
+                </>
+              }
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
             />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              <Calendar className="w-4 h-4 inline mr-1" />
-              End Date
-            </label>
-            <input
+            <Input
+              label={
+                <>
+                  <Calendar className="w-4 h-4 inline mr-1" /> End Date
+                </>
+              }
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
             />
           </div>
-        </div>
 
-        <div className="flex gap-3 mt-4">
-          <button
-            onClick={fetchExportData}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium disabled:opacity-50"
-          >
-            {loading ? "Loading..." : "Generate Report"}
-          </button>
-          {exportData.length > 0 && (
-            <>
-              <button
-                onClick={downloadCSV}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Download CSV
-              </button>
-              <button
-                onClick={downloadExcel}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2"
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-                Download Excel
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+          <div className="flex gap-3 mt-6">
+            <Button
+              onClick={fetchExportData}
+              disabled={loading}
+              className="min-w-[140px]"
+            >
+              {loading ? "Loading..." : "Generate Report"}
+            </Button>
+            {exportData.length > 0 && (
+              <>
+                <Button
+                  variant="success"
+                  onClick={downloadCSV}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download CSV
+                </Button>
+                <Button
+                  variant="success"
+                  onClick={downloadExcel}
+                >
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                  Download Excel
+                </Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Data Table */}
       {exportData.length > 0 && (
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-700">
-                <tr>
-                  <th className="px-4 py-3">User</th>
-                  <th className="px-4 py-3">Contact</th>
-                  <th className="px-4 py-3">Project</th>
-                  <th className="px-4 py-3">Task</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Deadline</th>
-                  <th className="px-4 py-3">Submission</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Submitted</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {exportData.map((row, index) => (
-                  <tr key={index} className="hover:bg-gray-750">
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{row.userName}</div>
-                      <div className="text-xs text-gray-400">{row.email}</div>
-                    </td>
-                    <td className="px-4 py-3 text-xs">
-                      <div>@{row.telegram}</div>
-                      <div className="text-gray-400">@{row.twitter}</div>
-                    </td>
-                    <td className="px-4 py-3">{row.projectName}</td>
-                    <td className="px-4 py-3">
-                      <div className="max-w-xs truncate">{row.taskTitle}</div>
-                    </td>
-                    <td className="px-4 py-3 capitalize">{row.taskType}</td>
-                    <td className="px-4 py-3 text-xs">
-                      {row.taskDeadline || (
-                        <span className="text-gray-500">N/A</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <a
-                        href={row.submissionLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 text-xs truncate block max-w-xs"
-                      >
-                        {row.submissionLink}
-                      </a>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          row.status === "approved"
-                            ? "bg-green-500/20 text-green-500"
-                            : row.status === "rejected"
-                            ? "bg-red-500/20 text-red-500"
-                            : "bg-yellow-500/20 text-yellow-500"
-                        }`}
-                      >
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs">{row.submittedAt}</td>
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="bg-surfaceHover/50 border-b border-border">
+                  <tr>
+                    <th className="px-4 py-3 font-medium text-text-secondary">User</th>
+                    <th className="px-4 py-3 font-medium text-text-secondary">Contact</th>
+                    <th className="px-4 py-3 font-medium text-text-secondary">Project</th>
+                    <th className="px-4 py-3 font-medium text-text-secondary">Task</th>
+                    <th className="px-4 py-3 font-medium text-text-secondary">Type</th>
+                    <th className="px-4 py-3 font-medium text-text-secondary">Deadline</th>
+                    <th className="px-4 py-3 font-medium text-text-secondary">Submission</th>
+                    <th className="px-4 py-3 font-medium text-text-secondary">Status</th>
+                    <th className="px-4 py-3 font-medium text-text-secondary">Submitted</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-6 py-4 bg-gray-750 border-t border-gray-700">
-            <p className="text-sm text-gray-400">
-              Total Records:{" "}
-              <span className="font-semibold text-white">
-                {exportData.length}
-              </span>
-            </p>
-          </div>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {exportData.map((row, index) => (
+                    <tr key={index} className="hover:bg-surfaceHover/30 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-text-primary">{row.userName}</div>
+                        <div className="text-xs text-text-secondary">{row.email}</div>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-text-secondary">
+                        <div>@{row.telegram}</div>
+                        <div className="text-text-muted">@{row.twitter}</div>
+                      </td>
+                      <td className="px-4 py-3 text-text-primary">{row.projectName}</td>
+                      <td className="px-4 py-3 text-text-secondary">
+                        <div className="max-w-xs truncate" title={row.taskTitle}>{row.taskTitle}</div>
+                      </td>
+                      <td className="px-4 py-3 capitalize text-text-secondary">{row.taskType}</td>
+                      <td className="px-4 py-3 text-xs text-text-secondary">
+                        {row.taskDeadline || (
+                          <span className="text-text-muted">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <a
+                          href={row.submissionLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:text-primaryHover text-xs truncate block max-w-xs"
+                        >
+                          {row.submissionLink}
+                        </a>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "approved"
+                            ? "bg-success/10 text-success"
+                            : row.status === "rejected"
+                              ? "bg-danger/10 text-danger"
+                              : "bg-warning/10 text-warning"
+                            }`}
+                        >
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-text-secondary">{row.submittedAt}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="px-6 py-4 bg-surfaceHover/30 border-t border-border">
+              <p className="text-sm text-text-secondary">
+                Total Records:{" "}
+                <span className="font-semibold text-text-primary">
+                  {exportData.length}
+                </span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {!loading && exportData.length === 0 && (
-        <div className="bg-gray-800 rounded-lg p-12 text-center">
-          <FileSpreadsheet className="w-16 h-16 mx-auto text-gray-600 mb-4" />
-          <p className="text-gray-400">
+        <Card className="p-12 text-center border-dashed">
+          <FileSpreadsheet className="w-16 h-16 mx-auto text-text-muted mb-4" />
+          <p className="text-text-secondary text-lg">
             No data to display. Apply filters and click "Generate Report"
           </p>
-        </div>
+        </Card>
       )}
     </div>
   );
